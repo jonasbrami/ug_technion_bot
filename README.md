@@ -1,7 +1,7 @@
 # ug_technion_bot
 A simple Telegram bot written in python to get notifications when a spot is free in a requested course.
 
-Install dependencies: 
+Install the dependencies: 
 pip install mechanicalsoup python-telegram-bot --upgrade
 
 Before starting the bot, edit ug.py and replace 'ENTER YOUR TOKEN HERE' by the token of your telegram bot
