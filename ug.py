@@ -99,7 +99,7 @@ def cancel(bot, update, chat_data):
     return ConversationHandler.END
 
 
-updater = Updater(token='706355125:AAGC1gC12VMWfAHycLjt3Qz9SO0cfjw3jM8')
+updater = Updater(token='ENTER YOUR TOKEN HERE')
 
 dispatcher = updater.dispatcher
 
