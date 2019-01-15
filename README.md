@@ -9,13 +9,7 @@ pip install mechanicalsoup python-telegram-bot --upgrade
 Before starting the bot, edit ug.py and replace 'ENTER YOUR TOKEN HERE' by the token of your telegram bot
 
 Starting the bot:
-
 python ug.py
 
 Using the bot: 
-/start to begin and follow the instructions.
-
-
-
-
- 
+send /start to begin and then follow the instructions.
