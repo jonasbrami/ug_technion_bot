@@ -5,22 +5,27 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
 
 TIME_BETWEEN_REQUESTS = 30
 TIME_BETWEEN_POOLS = 300
-
+TIME_BETWEEN_RETRY=3
+MAX_NUMBER_OF_RETRY=3
 
 def checker(courses, id, pwd):
     available_list = list()
     browser = mechanicalsoup.StatefulBrowser()
-    browser.open("https://ug3.technion.ac.il/rishum/login")
+    for i in range(MAX_NUMBER_OF_RETRY):
+        browser.open("https://ug3.technion.ac.il/rishum/login")
 
-    if browser.get_url() == 'https://ug3.technion.ac.il/rishum/no-service':
-        return list()
+        if browser.get_url() == 'https://ug3.technion.ac.il/rishum/no-service':
+            return list()
+        browser.select_form()
+        browser.get_current_form()
+        browser["UID"] = id
+        browser["PWD"] = pwd
+        browser.submit_selected()
+        if browser.get_url()=='https://ug3.technion.ac.il/rishum/cart':
+            break
+        time.sleep(TIME_BETWEEN_RETRY)
 
-    browser.select_form()
-    browser.get_current_form()
-    browser["UID"] = id
-    browser["PWD"] = pwd
-    browser.submit_selected()
-
+    #print(browser.get_url()) #for test
     if browser.get_url()!='https://ug3.technion.ac.il/rishum/cart':
         raise Exception("Wrong IDs")
 
@@ -29,7 +34,7 @@ def checker(courses, id, pwd):
         page = browser.get_current_page()
         isAvailable = not bool(page.find("div", class_="error-msg"))
         if isAvailable:
-            print(page)
+            #print(page)
             available_list.append(course)
         time.sleep(TIME_BETWEEN_REQUESTS)
     return available_list
@@ -50,7 +55,7 @@ def get_ids(bot, update, chat_data):
     return COURSES
 
 
-def get_courses_and_pool(bot, update, chat_data, job_queue):
+def get_courses_and_pool(bot, update, chat_data, job_queue): #verify course exists, sinon revenir a courses
     chat_data['courses'] = update.message.text.split()
     update.message.reply_text("You will receive a notification as soon as a spot is available")
     update.message.reply_text("Pooling started! Send /cancel to stop")
@@ -65,6 +70,7 @@ def pool(bot, job):
     try:
         available_list = checker(chat_data['courses'], chat_data['id'], chat_data['password'])
     except Exception as e:
+        print(e)
         chat_data['job'].enabled=False
         bot.send_message(chat_id=chat_data['chat_id'], text="Wrong IDs, Job disabled, send /cancel and then /start to create a new one.")
         return
@@ -82,7 +88,7 @@ def job_already_running(bot, update,chat_data):
         return ConversationHandler.END
 
     update.message.reply_text(
-        "A job is already running for "
+        "A job is already running for " #ajouter last update? possibilite de refresh now?
         + ' '.join(chat_data['courses'])+'\n'
         + "To modify it, send /cancel to stop it and then /start to make a new one")
     return POOL
@@ -93,7 +99,7 @@ def cancel(bot, update, chat_data):
     return ConversationHandler.END
 
 
-updater = Updater(token='ENTER YOUR TOKEN HERE')
+updater = Updater(token='706355125:AAGC1gC12VMWfAHycLjt3Qz9SO0cfjw3jM8')
 
 dispatcher = updater.dispatcher
 
