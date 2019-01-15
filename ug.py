@@ -21,7 +21,6 @@ def checker(courses, id, pwd):
     browser["PWD"] = pwd
     browser.submit_selected()
 
-    print(browser.get_url()) #for test
     if browser.get_url()!='https://ug3.technion.ac.il/rishum/cart':
         raise Exception("Wrong IDs")
 
