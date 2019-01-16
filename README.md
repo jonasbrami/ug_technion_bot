@@ -1,7 +1,7 @@
 # ug_technion_bot
 A simple Telegram bot written in Python to get notifications and automatically register when a spot is available.
 
-# If you are too lazy and don't want to install your own bot, you can directly use the one I'm hosting: @ug_updates_bot
+# If you don't want to install your own bot, you can directly use the one I'm hosting: @ug_updates_bot
 
 Install the dependencies: 
 pip3 install mechanicalsoup python-telegram-bot --upgrade
