@@ -13,3 +13,5 @@ python3 ug.py
 
 Using the bot: 
 send /start to begin and then follow the instructions.
+
+NOT BUG FREE!!!?
