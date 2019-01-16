@@ -7,7 +7,7 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
 # SECURITY CONSTANTS
 
 BOT_TOKEN = 'ENTER YOUR TOKEN HERE'
-ADMIN_USERNAME = 'enter your username'
+ADMIN_USERNAME = 'ENTER YOUR USERNAME HERE'
 
 # To notify the users before a bot update/restart
 chats_id_list = list()
@@ -22,7 +22,6 @@ MAX_NUMBER_OF_RETRY = 5
 IDS, COURSES, AUTOMATIC, POOL = range(4)
 
 # Logging features
-current_number_of_job = 0
 total_number_of_jobs_created = 0
 
 # Web server helper functions
@@ -192,9 +191,7 @@ def activate_auto_and_schedule_job(bot, update, chat_data, job_queue):
     job = job_queue.run_repeating(pool, interval=TIME_BETWEEN_POOLS, first=0, context=chat_data)
     chat_data['job'] = job
 
-    global current_number_of_job
     global total_number_of_jobs_created
-    current_number_of_job += 1
     total_number_of_jobs_created += 1
 
     return POOL
@@ -205,9 +202,6 @@ def job_already_running(bot, update, chat_data):
     if not chat_data['job'].enabled :
         update.message.reply_text("No job running. Send /start to make a new one")
 
-        global current_number_of_job
-        current_number_of_job += 1
-
         return ConversationHandler.END
 
     update.message.reply_text(
@@ -216,7 +210,6 @@ def job_already_running(bot, update, chat_data):
         + ' '.join(chat_data['courses']) + '\n'
         + 'Automatic mode is ' + str(chat_data['automatic']) + '\n'
         + "To modify the job, send /cancel to stop it and then /start to make a new one" + '\n' + '\n'
-        + "current number of jobs in the system : " + str(current_number_of_job) + '\n'
         + "total number of jobs created : " + str(total_number_of_jobs_created))
     return POOL
 
@@ -224,9 +217,6 @@ def job_already_running(bot, update, chat_data):
 def cancel(bot, update, chat_data):
     chat_data['job'].schedule_removal()
     update.message.reply_text("Pooling Stopped! Send /start to create a new job")
-
-    global current_number_of_job
-    current_number_of_job += 1
     return ConversationHandler.END
 
 
