@@ -1,13 +1,22 @@
 import mechanicalsoup
 import time
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
-                          ConversationHandler)
+                              ConversationHandler)
+
+
+# SECURITY CONSTANTS
+
+BOT_TOKEN = 'ENTER YOUR TOKEN HERE'
+ADMIN_USERNAME = 'enter your username'
+
+# To notify the users before a bot update/restart
+chats_id_list = list()
 
 # constants used to wait between requests on the webserver to avoid being banned/blacklisted
 TIME_BETWEEN_REQUESTS = 30
 TIME_BETWEEN_POOLS = 300
 TIME_BETWEEN_RETRY = 3
-MAX_NUMBER_OF_RETRY = 3
+MAX_NUMBER_OF_RETRY = 5
 
 # Telegram BOT states
 IDS, COURSES, AUTOMATIC, POOL = range(4)
@@ -16,7 +25,7 @@ IDS, COURSES, AUTOMATIC, POOL = range(4)
 current_number_of_job = 0
 total_number_of_jobs_created = 0
 
-# webserver helper functions
+# Web server helper functions
 def ug_login(id, pwd):
     """
 
@@ -35,7 +44,7 @@ def ug_login(id, pwd):
             browser["UID"] = id
             browser["PWD"] = pwd
             browser.submit_selected()
-        except Exception: #sometimes, the webserver times out
+        except Exception: #sometimes, the webserver times out...
             pass
         if browser.get_url() == 'https://ug3.technion.ac.il/rishum/cart':
             break
@@ -117,6 +126,7 @@ def pool(bot, job):
         bot.send_message(chat_id=chat_data['chat_id'],
                          text="No more course to pool. Job disabled"+'\n'
                               " send /cancel and then /start to create a new one.")
+        return
     try:
         available_list = checker(chat_data['courses'], chat_data['id'], chat_data['password'])
     except Exception:
@@ -139,6 +149,8 @@ def pool(bot, job):
 # Telegram BOT states and fallbacks callbacks
 
 def start(bot, update):
+    global chats_id_list
+    chats_id_list.append(update.message.chat_id)
     update.message.reply_text("Enter your ug's id and password separated by one space. Example:\n123456789 password")
     return IDS
 
@@ -217,10 +229,18 @@ def cancel(bot, update, chat_data):
     current_number_of_job += 1
     return ConversationHandler.END
 
+
+def notify_users(bot,update):
+    if update.message.from_user.username != ADMIN_USERNAME:
+        update.message.reply_text("unauthorized username!")
+        return
+    for chat_id in chats_id_list:
+        bot.send_message(chat_id=chat_id, text="The BOT is about to restart, you'll need to restart a new job")
+
 ###
 
 
-updater = Updater(token='YOUR TOKEN HERE')
+updater = Updater(token=BOT_TOKEN)
 
 dispatcher = updater.dispatcher
 
@@ -239,6 +259,7 @@ ug_handler = ConversationHandler(
     fallbacks=[CommandHandler('cancel', cancel, pass_chat_data=True)]
 )
 
+admin_handler = CommandHandler('admin', notify_users)
 dispatcher.add_handler(ug_handler)
-
+dispatcher.add_handler(admin_handler)
 updater.start_polling()
