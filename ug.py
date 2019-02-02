@@ -129,10 +129,12 @@ def pool(bot, job):
     try:
         available_list = checker(chat_data['courses'], chat_data['id'], chat_data['password'])
     except Exception:
-        chat_data['job'].enabled = False
+        chat_data['consec_error'] += 1
         bot.send_message(chat_id=chat_data['chat_id'],
-                         text="Wrong IDs, Job disabled, send /cancel and then /start to create a new one.")
+                         text="Couldn't connect to UG. Either your entered the wrong id's or UG is down.\n")
         return
+
+    chat_data['consec_error'] = 0
 
     for course in available_list:
         notification += "A spot is available for " + course + "\n"
