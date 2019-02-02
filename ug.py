@@ -131,9 +131,9 @@ def pool(bot, job):
     except Exception:
         chat_data['consec_error'] += 1
         bot.send_message(chat_id=chat_data['chat_id'],
-                         text="Couldn't connect to UG. Either your entered the wrong id's or UG is down.\n")
+                         text="Couldn't connect to UG for "+str(chat_data['consec_error'])+" times. \n"+
+                                "Either your entered the wrong id's or UG is down.\n")
         return
-
     chat_data['consec_error'] = 0
 
     for course in available_list:
